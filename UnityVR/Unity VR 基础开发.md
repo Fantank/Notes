@@ -109,3 +109,46 @@
 	如果头显没有正常显示，可以选择取消第三步中的Mock Runtime后再次尝试，其他问题可以参考[这里](https://learn.unity.com/tutorial/vr-project-setup?uv=2021.3&pathwayId=627c12d8edbc2a75333b9185&missionId=62554983edbc2a76a27486cb#627133f8edbc2a13728cc699)
 
 如果你希望将将其打包成App并且安装在Oculus上，可以参考[这个步骤](https://learn.unity.com/tutorial/vr-project-setup?uv=2021.3&pathwayId=627c12d8edbc2a75333b9185&missionId=62554983edbc2a76a27486cb#627133f8edbc2a13728cc69a)，但是这里暂时用不上所以先跳过。
+
+## VR中的运动（Locomotion）
+
+在VR中，一般存在三种运动方式：
+
+- room-scale，即实际运动，你可以通过走动来实现在VR中的移动
+- continuous，即连续运动（或基于控制器），就是使用控制器来连续的在空间中移动，可能会造成眩晕
+- teleporting，即瞬间移动，指传送到某一个位置
+
+在这部分中，我们将进一步完善房间并实现移动效果。
+
+### 装饰房间
+
+在上一部分中，房间的装饰还比较简陋，可以继续自行加一些装饰。
+
+![image-20230425213021105](Unity VR 基础开发.assets/image-20230425213021105.png)
+
+### 转动视角
+
+转动视角需要我们先添加一些插件。
+
+1. 在层级选项中选中XR Rig，在检查器栏目中看到XR Origin插件，在此添加一个Locomotion System组件，并且将XR Origin组件拖拽到Locomotion System的XR Origin属性中。![image-20230425214156665](Unity VR 基础开发.assets/image-20230425214156665.png)
+2. 在XR Rig中继续添加一个Snap Turn Provider（Action-based）组件，不要选择Device-based组件，因为这样可能只会兼容一种设备。![image-20230425215025213](Unity VR 基础开发.assets/image-20230425215025213.png)
+3. Snap Turn Provider组件具有一些属性：
+	- System，运动系统，需要将刚刚添加的Locomotion System拖拽以启用
+	- Turn Amount，每次转动的角度，指拨动一次摇杆后转动的角度
+	- Debounce Time，退避时间，即两次摇杆拨动触发的时间间隔
+	- Enable Turn Left Right，允许左右转动
+	- Enable Turn Around，允许向后拨动摇杆时转身180°
+	- Left/Right Hand Snap Turn Action,设置对哪个控制器启用该插件，默认情况下是两个控制器都启用的
+
+完成设置后，启动测试，当使用控制器左右摇杆后，正确设置的情况下应该发现可以转动视角了。
+
+当然，这时一种非连贯的转动视角，如果需要连贯转动视角，需要按照下面的配置。
+
+1. 将上述配置了的Snap Turn Provider禁用，添加摇杆Continuous Turn Provider (Action Based) 的组件
+2. 配置这个组件：
+	- System，和之前的配置一样，需要选择使用的运动系统，将Locomotion System拖拽过来
+	- Turn Speed，每秒钟转动的角度，即角速度，可以自行设定
+	- Left/Right Hand Snap Turn Action,设置对哪个控制器启用该插件，默认情况下是两个控制器都启用的
+
+再次注意，使用VR较少的用户在连续运动下产生眩晕感，这是正常的。
+
