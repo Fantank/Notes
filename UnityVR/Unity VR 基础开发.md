@@ -152,3 +152,45 @@
 
 再次注意，使用VR较少的用户在连续运动下产生眩晕感，这是正常的。
 
+### 移动位置
+
+移动位置需要设置一些新的组件，首先来看传送方式。
+
+1. 在XR Rig中添加Teleportation Provider组件，并且将System属性值中拖入Locomotion System![image-20230426111035931](Unity VR 基础开发.assets/image-20230426111035931.png)
+2. 选择一个区域，比如毯子或创建一个空物体在你想传送的区域，然后给这个物体添加一个Teleportation Area的组件，并设置其中的属性：
+	- Interaction Layer Mask：允许与Interaction Layer Mask与任何图层重叠的Interactor进行交互，如果交互物体和该组件所在物体位于包含在同一层即可交互
+	- Colliders：进行交互使用的碰撞器（如果为空，则使用任何子碰撞器）
+	- Custom Reticle：当有效时，在选择线的末端出现的准星
+	- Select Mode：指示Interactable的选择策略。这控制了有多少物体可以选择该物体进行交互。
+		- Single：将Select Mode设置为Single，以防止同时有多个物体选择。
+		- Multiple：将Select Mode设置为Multiple，以允许多个物体同时选择。
+	- Match Orientation：瞬移后如何定向Rig。
+		- World Space Up：保持根据世界空间上向量定向。
+		- Target Up：根据目标Teleport Anchor Transform（需要添加该组件）的上向量定向。
+		- Target Up And Forward：根据目标的Base Teleportation Interactable Transform的旋转定向。
+		- None：保持瞬移前后相同的定向。
+	- Teleport Trigger：指定何时触发瞬移。
+		- OnSelectEntered：当选择这个物体时瞬移，如按下扳机键立刻触发
+		- OnSelectExited：当这个Interactable不再被选择后瞬移，如放开扳机键后触发
+		- OnActivated：当激活这个物体时瞬移，这里的激活和物体的Active是不一样的；如按下激活按钮时触发。
+		- OnDeactivated：当取消激活这个Interactable时瞬移，如松开激活按钮时触发。
+	- Teleportation Provider：指的是需要被移动的物体。如果没有配置，则会在Awake时尝试自动寻找一个。![image-20230426113018175](Unity VR 基础开发.assets/image-20230426113018175.png)
+
+这时候，再次进入VR调试，你会发现启用了瞬移相关组件的Object可以交互了；当控制器指向该物体，引导线会变白，此时按下扳机键，你就可以传送到该物体的任何部分（具体的位置是根据Collider决定的，会传送到引导线和Collider碰撞的地方）。
+
+当然，使用Teleprtation Anchor也可以进行传送。
+
+1. 为了方便，可以修改Prefab的内容，给毯子的prefab加上该组件；如果不想这么做，也可以给每个实例添加Teleprtation Anchor。![image-20230426115331470](Unity VR 基础开发.assets/image-20230426115331470.png)
+2. 这个组件存在很多属性，不过很多和Teleprtation Area类似，这里说一些关键的部分：
+	- Interaction Manager，即要与该组件通信的XRInteractionManager，可以不设置因为会自动寻找
+	- Teleportation Anchor Transform，指的是转送到的位置，使用Transform组件的一个引用，默认是自己物体的坐标
+
+这样设置后，可以点击任意放置在场景中的毯子来进行传送了。如果设置了Target Up And Forward，那么就会传送的同时转向物体的local position的z方向。
+
+最后一个小问题，如果只通过引导线来表现选中的传送区域，这样可能不太直观。一般的VR应用会在传送位置加上一个准星来表示传送的位置，这个选项在Teleprtation Area/Anchor的Custom Reticle选项中，只需要在_Prefabs/VR/Reticle文件夹中选择一个你喜欢的准心，拖拽上去即可。
+
+![image-20230426120420061](Unity VR 基础开发.assets/image-20230426120420061.png)
+
+这样，再次带上头显，就可以看到选中区域出现准心了。
+
+如果你想要连续移动，只需要给XR Rig添加一个Continuous Move Provider即可。
