@@ -194,3 +194,68 @@
 这样，再次带上头显，就可以看到选中区域出现准心了。
 
 如果你想要连续移动，只需要给XR Rig添加一个Continuous Move Provider即可。
+
+## 可拾取的物品
+
+### 更换手部模型
+
+在之前的内容中，控制器显示是一个球体，我们可以更换它。
+
+1. 在XR Rig / Camera Offset下找到 LeftHand/RightHand Controller
+2. 将_Prefabs/VR/Hands的手部模型拖拽到 Model Prefab属性即可完成手部的更换
+
+![image-20230426155521357](Unity VR 基础开发.assets/image-20230426155521357.png)
+
+### 添加可拾取物品
+
+我们可以拾取VR中的一些物品，这是非常重要的功能。
+
+1. 选取一个物品放入场景中，比如一个苹果，并且给它添加一个XR Grab Interactable组件；这个操作会自动给它添加一个刚体组件
+
+	![image-20230426193512927](Unity VR 基础开发.assets/image-20230426193512927.png)
+
+2. XR Grab Interactable带来了很多属性：
+
+	- Colliders：这个属性是用来指定这个Interactable要用哪些碰撞器来进行交互的，如果没有指定，它会使用所有子物体上的碰撞器。
+	- Distance Calculation Mode：这个属性是用来指定这个Interactable要用什么方式来计算和Interactor之间的距离的，有三种方式可以选择，从最快到最精确
+		- Transform Position：这种方式是用Interactable的变换位置来计算距离，这种方式性能开销很低，但是对于一些物体可能距离计算不够准确。
+		- Collider Position：这种方式是用Interactable的碰撞器列表中每个碰撞器的最短距离来计算距离，这种方式性能开销适中，对于大多数物体应该有适中的距离计算精度。
+		- Collider Volume：这种方式是用Interactable的碰撞器列表中每个碰撞器的最近点（在表面或者内部）来计算距离，这种方式性能开销很高，但是有很高的距离计算精度。
+	- Select Mode：这个属性是用来指定这个Interactable的选择策略的，它控制了有多少个Interactor可以同时选择这个Interactable。
+		- Single：设置Select Mode为Single可以防止多于一个Interactor同时选择这个Interactable。
+		- Multiple：设置Select Mode为Multiple可以允许多个Interactor同时选择这个Interactable。
+	- Movement Type：这个属性是用来指定当这个物体被选中时，它是如何移动的，有三种方式可以选择
+		- Velocity Tracking：设置Movement Type为Velocity Tracking可以让Interactable通过设置刚体的速度和角速度来移动。使用这种方式可以防止物体在跟随Interactor时穿过没有刚体的其他碰撞器，但是缺点是物体可能会有延迟感，不会像Instantaneous（瞬时）那样平滑。
+		- Kinematic：设置Movement Type为Kinematic可以让Interactable通过移动运动学刚体来接近目标位置和方向。使用这种方式可以保持物体的视觉表现和物理状态同步，并且允许物体在跟随Interactor时穿过没有刚体的其他碰撞器。
+		- Instantaneous：设置Movement Type为Instantaneous可以让Interactable通过每帧设置变换的位置和旋转来移动。使用这种方式可以让物体的视觉表现每帧都更新，最小化延迟，但是缺点是物体会穿过没有刚体的其他碰撞器。
+	- Retain Transform Parent：启用这个属性可以让Unity在物体被释放后，把它的父物体设置回原来的父物体
+	- Track Position：启用这个属性可以让物体在被选中时跟随Interactor的位置
+	- Smooth Position：启用这个属性可以让Unity在跟随Interactor的位置时应用平滑效果
+	- Smoothing Amount：这个属性是用来指定平滑效果的强度的，值越大，平滑效果越强
+	- Track Rotation：启用这个属性可以让物体在被选中时跟随Interactor的旋转
+	- Smooth Rotation：启用这个属性可以让Unity在跟随Interactor的旋转时应用平滑效果
+	- Throw On Detach：启用这个属性可以让物体在被释放时保持速度和角速度
+	- Throw Smoothing Duration：这个属性是用来指定释放时速度和角速度平滑过渡的时间长度的
+	- Throw Velocity Scale：这个属性是用来指定释放时速度缩放比例Throw Angular Velocity Scale：这个属性是用来指定释放时角速度缩放比例的
+	- Gravity On Detach：启用这个属性可以让物体在被释放后受到重力影响
+		Colliders On Detach：启用这个属性可以让物体在被释放后启用碰撞器
+
+完成这个步骤后，你应该可以在VR中捡起一些物体，并且进行一些基于物理的投掷等行为了。
+
+但是，很容易发现的是，这种情况下拾取的物品是不在手中心的，并且如果使用摇杆转动或者移动这个物体，那么也会和已经设置的移动和视角转动功能冲突。
+
+1. 首先，找到XR Rig下的Left/Right Hand Controller，并找到它对应的XR ray Interactor组件
+
+	![image-20230426200031616](Unity VR 基础开发.assets/image-20230426200031616.png)
+
+2. 对这个组件进行一些设置：
+
+	- Force Grab：这个选项是用来允许物体和控制器可以间隔一段举例交互的，表现就是允许从远处抓取控制器碰不到的物品
+	- Anchor Controller：允许使用摇杆来控制物品和控制器的距离和旋转
+	- Hide Controller On Select：使得选中物品时，控制器的模型消失
+
+经过这个设置，这样物体在抓取后不再能在手中转动了。
+
+最后，对于XR Ray Interactor和XR Grab Interactable组件，有一些设置必须说明的属性：
+
+- Attach Transform：抓取物体的位置，当抓取物体时两个组件中的该位置会被绑定，如果没有该组件则默认是Transform的位置
