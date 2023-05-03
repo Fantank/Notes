@@ -259,3 +259,42 @@
 最后，对于XR Ray Interactor和XR Grab Interactable组件，有一些设置必须说明的属性：
 
 - Attach Transform：抓取物体的位置，当抓取物体时两个组件中的该位置会被绑定，如果没有该组件则默认是Transform的位置
+
+## 插槽持有可交互物体
+
+如果我们希望将一个物体挂载在一个位置，而不是通过控制器持有它，我们需要做一些操作。
+
+### 设置Socket
+
+1. 给一个物体添加一个碰撞体，并且设置为is Trigger作为触发器使得可交互物体触碰时发生悬停，同时添加一个XR Socket Interactor组件
+
+
+
+1. 对于这个组件，有以下属性需要关注：
+	- **Interaction Layer Mask**：允许与那些交互层遮罩与这个交互层遮罩有任何层重叠的可交互物体进行交互。
+	- **Attach Transform**：用作可交互物体的附着点的变换。如果没有则会在Awake时自动实例化并设置。
+	- **Starting Selected Interactable**：这个交互器在启动时自动选择的可交互物体（可选，可以没有）。
+	- **Keep Selected Target Valid**：是否在最初选择一个可交互物体后即使它不再是一个有效目标也保持选择它。启用这个选项可以让XRInteractionManager保留选择，即使可交互物体不包含在有效目标列表中。禁用这个选项可以让XRInteractionManager在可交互物体不在有效目标列表中时清除选择。禁用这个选项的一个常见用途是对于用于传送的射线交互器，当不指向它时让传送的可交互物体不再被选中。
+	- **Show Interactable Hover Meshes**：是否让这个插槽在其附着点处为它悬停在上面的可交互物体显示一个网格。
+	- **Hover Mesh Material**：用于渲染悬停可交互物体网格的材质（如果没有提供则会创建一个默认材质）。
+	- **Can’t Hover Mesh Material**：用于渲染悬停可交互物体网格当插槽中已经有一个被选中的对象时的材质（如果没有提供则会创建一个默认材质）。
+	- **Hover Scale**：渲染悬停可交互物体时的缩放比例。
+	- **Socket Active**：是否启用插槽交互。
+	- **Recycle Delay Time**：设置当一个对象从插槽中移除后，插槽拒绝悬停的时间。
+2. 接下来，我们需要设置一个正确的悬停点，正如这个插件的Attach Transfrom属性，只需要设置一个正确的Transform来作为物体的正确悬停坐标就可以了，一般设置一个空物体作为子物体即可。
+
+完成之后，我们应该可以通过让可交互物体的碰撞体和设置为触发器的socket的碰撞体发生交互，让可交互物体悬停在Attach Transform处。
+
+同样地操作，你可以给XR Rig中的Main Camera添加一个XR Socket Interactor来带上帽子。
+
+![image-20230427194721747](Unity VR 基础开发.assets/image-20230427194721747.png)
+
+### 添加物品遮罩
+
+前面一直遗留了一个问题，那就是可交互物品不应该是可以随意交互的，而是应该和不同的物品种类有关，比如只有帽子才能戴在头上。
+
+1. 找到XR Socket Interactor中的Interaction Layer Mask 选项，选择Add Layer，添加自定义的Layer
+2. 将Interaction Layer Mask设置为自定义的层级，并且将对应的可交互物品也设置成这个自定义的层级![image-20230427195913126](Unity VR 基础开发.assets/image-20230427195913126.png)
+
+现在只有XR Socket Interactor 和 XR Grab Interactor的物品都选中了自定义层级的情况下才能触发交互了。当然对于Teleportation Area/Anchor也有这样的设置，原理是类似的。
+
