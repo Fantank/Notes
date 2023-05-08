@@ -996,7 +996,7 @@ Model-View-View-ViewMode，这是一种基于前端开发的架构模式，其�
 
 	暂时不选择使用eslint，选择manually，以及取消Linter，选择3.x版本
 
-	<img src="D:\Projects\JavaFramewrok\SpringBoot\image-20230329164534418.png" alt="image-20230329164534418" />
+	<img src="D:\Projects\JavaFramewrok\SpringBoot\image-20230329164534418.png" alt="image-20230329164534418"/>
 
 	选择把依赖存储到package.json中
 
