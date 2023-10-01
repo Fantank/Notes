@@ -130,7 +130,7 @@ Maven是一个项目管理工具，把项目的开发和管理抽象成项目对
 D:\JavaDevelopment\Maven-repo\javax\servlet\servlet-api\2.5\servlet-api-2.5.jar
 ```
 
-####使用命令生成Maven工程
+#### 使用命令生成Maven工程
 
 ```
 mvn archetype:generate
